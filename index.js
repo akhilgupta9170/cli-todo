@@ -8,62 +8,74 @@ class Todo {
 
     loadTodos() {
         if (!fs.existsSync(this.filepath)) {
-            fs.writeFileSync(this.filepath, JSON.stringify([]));
+            fs.writeFile(this.filepath, JSON.stringify([]), (err) => {
+                if (err) console.error(err);
+            });
         }
     }
-    createTodo(title, description) {
-        const todos = JSON.parse(fs.readFileSync(this.filepath));
+
+    async readTodos() {
+        try {
+            const data = await fs.promises.readFile(this.filepath, 'utf8');
+            return data ? JSON.parse(data) : [];
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    async writeTodos(todos) {
+        try {
+            await fs.promises.writeFile(this.filepath, JSON.stringify(todos, null, 2));
+            console.log('File written successfully');
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async createTodo(title, description) {
+        const todos = await this.readTodos();
         const newTodo = {
             title,
             description,
             completed: false,
             id: Date.now()
         };
+
         todos.push(newTodo);
-        fs.writeFileSync(this.filepath, JSON.stringify(todos));
-        return newTodo;
-
-    }
-    deleteTodo(title) {
-        const todos = JSON.parse(fs.readFileSync(this.filepath));
-        const index = todos.findIndex(todo => todo.title === title );
-        if (index > -1) {
-            todos.splice(index, 1);
-            fs.writeFileSync(this.filepath, JSON.stringify(todos));
-            return true;
-        }
-        return false;
+        await this.writeTodos(todos);
+        console.log('Todo added successfully');
     }
 
-
-    getTodos() {
-        return JSON.parse(fs.readFileSync(this.filepath));
+    async deleteTodo(title) {
+        const todos = await this.readTodos();
+        const filteredTodos = todos.filter(todo => todo.title !== title);
+        await this.writeTodos(filteredTodos);
+        console.log('Todo deleted successfully');
     }
 
-    updateTodo(title, updatedTitle, updatedDescription) {
-        const todos = JSON.parse(fs.readFileSync(this.filepath));
-        const index = todos.findIndex(todo => todo.title === title);
-        if (index > -1) {
-            todos[index].title = updatedTitle;
-            todos[index].description = updatedDescription;
-            fs.writeFileSync(this.filepath, JSON.stringify(todos));
-            return true;
-        }
-        return false;
+    async getTodos() {
+        const todos = await this.readTodos();
+        console.log(todos);
     }
 
-
-
+    async updateTodo(title, updatedTitle, updatedDescription) {
+        const todos = await this.readTodos();
+        const updatedTodos = todos.map(todo => {
+            if (todo.title === title) {
+                return { ...todo, title: updatedTitle, description: updatedDescription };
+            }
+            return todo;
+        });
+        await this.writeTodos(updatedTodos);
+        console.log('Todo updated successfully');
+    }
 }
-// creating a new object
+
+// Creating a new object
 const todoApp = new Todo();
+todoApp.createTodo("Go to bed","rest favorite");
 
-todoApp.createTodo("Hello World","Hello World")
-// console.log(todoApp.getTodos())
-
-
-
+// todoApp.getTodos();
 
 module.exports = Todo;
-
-
