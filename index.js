@@ -72,10 +72,10 @@ class Todo {
     }
 }
 
-// Creating a new object
-const todoApp = new Todo();
-todoApp.createTodo("Go to bed","rest favorite");
+// // Creating a new object
+// const todoApp = new Todo();
+// todoApp.createTodo("Go to school", "Study hard");
 
-// todoApp.getTodos();
+// // todoApp.getTodos();
 
 module.exports = Todo;
