@@ -1,6 +1,6 @@
 const todo = require('./index.js');
 const yargs = require('yargs');
-console.log(process.argv)
+// console.log(process.argv)
 
 yargs.command({
     command: 'create',
@@ -65,8 +65,8 @@ yargs.command({
         },
         handler(argv) {
             const { title, updatedTitle, updatedDescription } = argv;
-            const newTodo = new todo(title);
-            newTodo.updateTodo(updatedTitle, updatedDescription);
+            const newTodo = new todo(title, updatedTitle, updatedDescription);
+            newTodo.updateTodo();
         }
 
     })
@@ -81,4 +81,4 @@ yargs.command({
         }
     })
 
-    yargs.parse()
+yargs.parse()
