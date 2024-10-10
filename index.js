@@ -1,7 +1,11 @@
 const fs = require('fs');
 
 class Todo {
-    constructor() {
+    constructor(title, description, updatedTitle, updatedDescription) {
+        this.title = title ? title.toLowerCase() : null;
+        this.description = description ? description.toLowerCase() : null;
+        this.updatedTitle = updatedTitle ? updatedTitle.toLowerCase() : null;
+        this.updatedDescription = updatedDescription ? updatedDescription.toLowerCase() : null;
         this.filepath = "todos.json";
         this.loadTodos();
     }
@@ -33,12 +37,16 @@ class Todo {
         }
     }
 
-    async createTodo(title, description) {
+    async createTodo() {
         const todos = await this.readTodos();
+        const existingTodo = todos.find(todo => todo.title === this.title && todo.description === this.description);
+        if (existingTodo) {
+            console.log('Todo with the same title already exists');
+            return;
+        }
         const newTodo = {
-            title,
-            description,
-            completed: false,
+            title: this.title,
+            description: this.description,
             id: Date.now()
         };
 
@@ -47,9 +55,13 @@ class Todo {
         console.log('Todo added successfully');
     }
 
-    async deleteTodo(title) {
+    async deleteTodo() {
         const todos = await this.readTodos();
-        const filteredTodos = todos.filter(todo => todo.title !== title);
+        if (todos.length == 0) {
+            console.log('todos has no tasks');
+            return;
+        }
+        const filteredTodos = todos.filter(todo => todo.title !== this.title);
         await this.writeTodos(filteredTodos);
         console.log('Todo deleted successfully');
     }
@@ -59,11 +71,29 @@ class Todo {
         console.log(todos);
     }
 
-    async updateTodo(title, updatedTitle, updatedDescription) {
+    async updateTodo() {
         const todos = await this.readTodos();
+        if (todos.length == 0) {
+            console.log('todos has no tasks');
+            return;
+        }
+        if (this.updatedTitle === null || this.updatedDescription === null) {
+            console.log('Please provide both updatedTitle and updatedDescription');
+            return;
+        }
+        const existingTodo = todos.find(todo => todo.title === this.updatedTitle && todo.description === this.updatedDescription);
+        if (!existingTodo) {
+            console.log('No todo found with the given title and description');
+            return;
+        }
+
         const updatedTodos = todos.map(todo => {
-            if (todo.title === title) {
-                return { ...todo, title: updatedTitle, description: updatedDescription };
+            if (todo.title === this.title) {
+                return {
+                    title: this.updatedTitle,
+                    description: this.updatedDescription,
+                    completed: todo.completed
+                };
             }
             return todo;
         });
