@@ -58,14 +58,10 @@ class Todo {
         try {
             if (todos.length == 0) {
                 throw new Error("List is empty");
-
             }
         } catch (err) {
             console.log(err);
             return;
-
-
-
         }
         const filteredTodos = todos.filter(todo => todo.id !== id);
         await this.writeTodos(filteredTodos);
@@ -80,41 +76,29 @@ class Todo {
 
     async updateTodo(id, updatedTitle, updatedDescription) {
         const todos = await this.readTodos();
-        try{
-        if (todos.length == 0) {
-            throw new Error("List is empty");
+
+        try {
+            if (todos.length == 0) {
+                throw new Error("List is empty");
+            }
+            const indexOfTodo = todos.findIndex(todo => todo.id === id);
+            if (indexOfTodo === -1) {
+                throw new Error("Todo not found");
+            }
+            todos[indexOfTodo].title = updatedTitle;
+            todos[indexOfTodo].description = updatedDescription;
+            console.log(todos[indexOfTodo].title)
+            console.log(todos[indexOfTodo].description)
+
+            await this.writeTodos(todos);
+            console.log('Todo updated successfully');
 
         }
-    }catch (err) {
-        console.log(err);
-        return;
-    }
-        const updatedTodos = todos.map(todo => {
-            if (todo.id === id) {
-                return {
-                    id,
-                    title: updatedTitle || todo.title,
-                    description: updatedDescription || todo.description,
-
-
-                };
-            }
-            return todo;
-        });
-
-
-        await this.writeTodos(updatedTodos);
-        console.log('Todo updated successfully');
-
-        
-
+        catch (err) {
+            console.log(err);
+            return;
+        }
     }
 }
-
-// // Creating a new object
-// const todoApp = new Todo();
-// todoApp.createTodo("Go to school", "Study hard");
-
-// // todoApp.getTodos();
 
 module.exports = Todo;
