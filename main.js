@@ -19,25 +19,25 @@ yargs.command({
     },
     handler(argv) {
         const { title, description } = argv;
-        const newTodo = new todo(title, description);
-        newTodo.createTodo();
+        const newTodo = new todo();
+        newTodo.createTodo(title, description);
     }
 
 })
     .command({
         command: 'delete',
-        describe: 'Delete a todo by title',
+        describe: 'Delete a todo by id',
         builder: {
-            title: {
-                description: 'Title of the todo to delete',
-                type: 'string',
+            id: {
+                description: 'id of the todo to delete',
+                type: Number,
                 demandOption: true
             }
         },
         handler(argv) {
-            const { title } = argv;
-            const newTodo = new todo(title);
-            newTodo.deleteTodo();
+            const { id } = argv;
+            const newTodo = new todo();
+            newTodo.deleteTodo(id);
         }
 
     })
@@ -45,28 +45,28 @@ yargs.command({
 
     .command({
         command: 'update',
-        describe: 'Update a todo by title',
+        describe: 'Update a todo by id',
         builder: {
-            title: {
-                description: 'Title of the todo to update',
-                type: 'string',
+            id: {
+                description: 'id of the todo to update',
+                type: Number,
                 demandOption: true
             },
             updatedTitle: {
                 description: 'Updated title of the todo',
                 type: 'string',
-                demandOption: true
+                demandOption: false
             },
             updatedDescription: {
                 description: 'Updated description of the todo',
                 type: 'string',
-                demandOption: true
+                demandOption: false
             }
         },
         handler(argv) {
-            const { title, updatedTitle, updatedDescription } = argv;
-            const newTodo = new todo(title, updatedTitle, updatedDescription);
-            newTodo.updateTodo();
+            const { id, updatedTitle, updatedDescription } = argv;
+            const newTodo = new todo();
+            newTodo.updateTodo(id, updatedTitle, updatedDescription);
         }
 
     })
