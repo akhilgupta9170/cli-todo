@@ -1,19 +1,17 @@
 const fs = require('fs');
 
+
 class Todo {
-    constructor(title, description, updatedTitle, updatedDescription) {
-        this.title = title ? title.toLowerCase() : null;
-        this.description = description ? description.toLowerCase() : null;
-        this.updatedTitle = updatedTitle ? updatedTitle.toLowerCase() : null;
-        this.updatedDescription = updatedDescription ? updatedDescription.toLowerCase() : null;
-        this.filepath = "todos.json";
+    constructor() {
+        this.filepath = './todos.json';
         this.loadTodos();
+
     }
 
     loadTodos() {
         if (!fs.existsSync(this.filepath)) {
             fs.writeFile(this.filepath, JSON.stringify([]), (err) => {
-                if (err) console.error(err);
+                if (err) throw new Error(err);
             });
         }
     }
@@ -23,8 +21,8 @@ class Todo {
             const data = await fs.promises.readFile(this.filepath, 'utf8');
             return data ? JSON.parse(data) : [];
         } catch (err) {
-            console.error(err);
-            return [];
+            throw new Error("Couldn't read");
+
         }
     }
 
@@ -33,20 +31,20 @@ class Todo {
             await fs.promises.writeFile(this.filepath, JSON.stringify(todos, null, 2));
             console.log('File written successfully');
         } catch (err) {
-            console.error(err);
+            throw new Error("Couldn't write");
         }
     }
 
-    async createTodo() {
+    async createTodo(title, description) {
         const todos = await this.readTodos();
-        const existingTodo = todos.find(todo => todo.title === this.title && todo.description === this.description);
+        const existingTodo = todos.find((todo) => todo.title === title);
         if (existingTodo) {
             console.log('Todo with the same title already exists');
             return;
         }
         const newTodo = {
-            title: this.title,
-            description: this.description,
+            title,
+            description,
             id: Date.now()
         };
 
@@ -55,50 +53,61 @@ class Todo {
         console.log('Todo added successfully');
     }
 
-    async deleteTodo() {
+    async deleteTodo(id) {
         const todos = await this.readTodos();
-        if (todos.length == 0) {
-            console.log('todos has no tasks');
+        try {
+            if (todos.length == 0) {
+                throw new Error("List is empty");
+
+            }
+        } catch (err) {
+            console.log(err);
             return;
+
+
+
         }
-        const filteredTodos = todos.filter(todo => todo.title !== this.title);
+        const filteredTodos = todos.filter(todo => todo.id !== id);
         await this.writeTodos(filteredTodos);
         console.log('Todo deleted successfully');
     }
+
 
     async getTodos() {
         const todos = await this.readTodos();
         console.log(todos);
     }
 
-    async updateTodo() {
+    async updateTodo(id, updatedTitle, updatedDescription) {
         const todos = await this.readTodos();
+        try{
         if (todos.length == 0) {
-            console.log('todos has no tasks');
-            return;
-        }
-        if (this.updatedTitle === null || this.updatedDescription === null) {
-            console.log('Please provide both updatedTitle and updatedDescription');
-            return;
-        }
-        const existingTodo = todos.find(todo => todo.title === this.updatedTitle && todo.description === this.updatedDescription);
-        if (!existingTodo) {
-            console.log('No todo found with the given title and description');
-            return;
-        }
+            throw new Error("List is empty");
 
+        }
+    }catch (err) {
+        console.log(err);
+        return;
+    }
         const updatedTodos = todos.map(todo => {
-            if (todo.title === this.title) {
+            if (todo.id === id) {
                 return {
-                    title: this.updatedTitle,
-                    description: this.updatedDescription,
-                    completed: todo.completed
+                    id,
+                    title: updatedTitle || todo.title,
+                    description: updatedDescription || todo.description,
+
+
                 };
             }
             return todo;
         });
+
+
         await this.writeTodos(updatedTodos);
         console.log('Todo updated successfully');
+
+        
+
     }
 }
 
