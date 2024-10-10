@@ -48,6 +48,7 @@ yargs.command({
         describe: 'Update a todo by id',
         builder: {
             id: {
+
                 description: 'id of the todo to update',
                 type: Number,
                 demandOption: true
